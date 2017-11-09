@@ -223,13 +223,14 @@ public class CommitNoteFragment extends ListDataBaseFragment<GitComment> impleme
     }
 
     @Override
-    protected Single<List<GitComment>> onCreateDataSingle() {
+    protected Single<List<GitComment>> onCreateDataSingle(boolean bypassCache) {
         List<GitComment> comments = getArguments().getParcelableArrayList("comments");
         if (comments != null && !comments.isEmpty()) {
             return Single.just(comments);
         }
 
-        final RepositoryCommentService service = ServiceFactory.get(RepositoryCommentService.class);
+        final RepositoryCommentService service =
+                ServiceFactory.get(RepositoryCommentService.class, bypassCache);
 
         return ApiHelpers.PageIterator
                 .toSingle(page -> service.getCommitComments(mRepoOwner, mRepoName, mObjectSha, page))
@@ -280,7 +281,7 @@ public class CommitNoteFragment extends ListDataBaseFragment<GitComment> impleme
 
     @Override
     public Single<?> onEditorDoSend(String comment) {
-        RepositoryCommentService service = ServiceFactory.get(RepositoryCommentService.class);
+        RepositoryCommentService service = ServiceFactory.get(RepositoryCommentService.class, false);
         CreateCommitComment request = CreateCommitComment.builder().body(comment).build();
         return service.createCommitComment(mRepoOwner, mRepoName, mObjectSha, request)
                 .map(ApiHelpers::throwOnFailure);
@@ -303,7 +304,7 @@ public class CommitNoteFragment extends ListDataBaseFragment<GitComment> impleme
     }
 
     private void deleteComment(long id) {
-        RepositoryCommentService service = ServiceFactory.get(RepositoryCommentService.class);
+        RepositoryCommentService service = ServiceFactory.get(RepositoryCommentService.class, false);
         service.deleteCommitComment(mRepoOwner, mRepoName, id)
                 .map(ApiHelpers::throwOnFailure)
                 .compose(RxUtils.wrapForBackgroundTask(getBaseActivity(),
