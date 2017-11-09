@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import com.gh4a.BaseActivity;
 import com.gh4a.Gh4Application;
 import com.gh4a.R;
+import com.gh4a.ServiceFactory;
 import com.gh4a.activities.EditCommitCommentActivity;
 import com.gh4a.adapter.CommitNoteAdapter;
 import com.gh4a.adapter.RootAdapter;
@@ -228,8 +229,7 @@ public class CommitNoteFragment extends ListDataBaseFragment<GitComment> impleme
             return Single.just(comments);
         }
 
-        final RepositoryCommentService service =
-                Gh4Application.get().getGitHubService(RepositoryCommentService.class);
+        final RepositoryCommentService service = ServiceFactory.get(RepositoryCommentService.class);
 
         return ApiHelpers.PageIterator
                 .toSingle(page -> service.getCommitComments(mRepoOwner, mRepoName, mObjectSha, page))
@@ -280,8 +280,7 @@ public class CommitNoteFragment extends ListDataBaseFragment<GitComment> impleme
 
     @Override
     public Single<?> onEditorDoSend(String comment) {
-        RepositoryCommentService service =
-                Gh4Application.get().getGitHubService(RepositoryCommentService.class);
+        RepositoryCommentService service = ServiceFactory.get(RepositoryCommentService.class);
         CreateCommitComment request = CreateCommitComment.builder().body(comment).build();
         return service.createCommitComment(mRepoOwner, mRepoName, mObjectSha, request)
                 .map(ApiHelpers::throwOnFailure);
@@ -304,8 +303,7 @@ public class CommitNoteFragment extends ListDataBaseFragment<GitComment> impleme
     }
 
     private void deleteComment(long id) {
-        RepositoryCommentService service =
-                Gh4Application.get().getGitHubService(RepositoryCommentService.class);
+        RepositoryCommentService service = ServiceFactory.get(RepositoryCommentService.class);
         service.deleteCommitComment(mRepoOwner, mRepoName, id)
                 .map(ApiHelpers::throwOnFailure)
                 .compose(RxUtils.wrapForBackgroundTask(getBaseActivity(),

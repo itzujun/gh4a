@@ -378,8 +378,7 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
     }
 
     private void toggleFollowingState() {
-        UserFollowerService service =
-                Gh4Application.get().getGitHubService(UserFollowerService.class);
+        UserFollowerService service = ServiceFactory.get(UserFollowerService.class);
         Single<Response<Void>> responseSingle = mIsFollowing
                 ? service.unfollowUser(mUserLogin)
                 : service.followUser(mUserLogin);
@@ -393,7 +392,7 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
     }
 
     private void loadUser(boolean force) {
-        UserService service = Gh4Application.get().getGitHubService(UserService.class);
+        UserService service = ServiceFactory.get(UserService.class);
         service.getUser(mUserLogin)
                 .map(ApiHelpers::throwOnFailure)
                 .compose(makeLoaderSingle(ID_LOADER_USER, force))
@@ -407,8 +406,7 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
     }
 
     private void loadTopRepositories() {
-        RepositoryService service = ServiceFactory.createService(
-                RepositoryService.class, null, null, 5);
+        RepositoryService service = ServiceFactory.get(RepositoryService.class, null, null, 5);
         final Single<Response<Page<Repository>>> observable;
 
         Map<String, String> filterData = new HashMap<>();
@@ -431,8 +429,7 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
     }
 
     private void loadOrganizations() {
-        final OrganizationService service =
-                Gh4Application.get().getGitHubService(OrganizationService.class);
+        final OrganizationService service = ServiceFactory.get(OrganizationService.class);
         mOrgListSubscription = ApiHelpers.PageIterator
                 .toSingle(page -> mIsSelf
                         ? service.getMyOrganizations(page)
@@ -443,8 +440,7 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
     }
 
     private void loadIsFollowingState(boolean force) {
-        UserFollowerService service =
-                Gh4Application.get().getGitHubService(UserFollowerService.class);
+        UserFollowerService service = ServiceFactory.get(UserFollowerService.class);
         mIsFollowingSubscription = service.isFollowing(mUserLogin)
                 .map(ApiHelpers::mapToBooleanOrThrowOnFailure)
                 .compose(makeLoaderSingle(ID_LOADER_IS_FOLLOWING, force))
