@@ -388,7 +388,10 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
                     mIsFollowing = !mIsFollowing;
                     updateFollowingAction();
                     getActivity().invalidateOptionsMenu();
-                }, error -> getActivity().invalidateOptionsMenu());
+                }, error -> {
+                    handleActionFailure("Toggling following state failed", error);
+                    getActivity().invalidateOptionsMenu();
+                });
     }
 
     private void loadUser(boolean force) {
@@ -401,7 +404,7 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
                     fillData(force);
                     setContentShown(true);
                     getActivity().invalidateOptionsMenu();
-                }, error -> {});
+                }, this::handleLoadFailure);
 
     }
 
@@ -425,7 +428,7 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
                 .map(ApiHelpers::throwOnFailure)
                 .map(Page::items)
                 .compose(makeLoaderSingle(ID_LOADER_REPO_LIST, force))
-                .subscribe(this::fillTopRepos, error -> {});
+                .subscribe(this::fillTopRepos, this::handleLoadFailure);
     }
 
     private void loadOrganizations(boolean force) {
@@ -436,7 +439,7 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
                         : service.getUserPublicOrganizations(mUserLogin, page)
                 )
                 .compose(makeLoaderSingle(ID_LOADER_ORG_LIST, force))
-                .subscribe(this::fillOrganizations, error -> {});
+                .subscribe(this::fillOrganizations, this::handleLoadFailure);
     }
 
     private void loadIsFollowingState(boolean force) {
@@ -447,6 +450,6 @@ public class UserFragment extends LoadingFragmentBase implements View.OnClickLis
                 .subscribe(result -> {
                     mIsFollowing = result;
                     getActivity().invalidateOptionsMenu();
-                }, error -> {});
+                }, this::handleLoadFailure);
     }
 }

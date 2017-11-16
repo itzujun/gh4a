@@ -346,6 +346,6 @@ public class FileViewerActivity extends WebViewerActivity
                         setContentEmpty(true);
                         setContentShown(true);
                     }
-                }, error -> {});
+                }, this::handleLoadFailure);
     }
 }
